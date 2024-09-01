@@ -1,8 +1,10 @@
+const addButton = document.querySelector(".btn");
+const itemList = document.querySelector("ul");
+const item = document.getElementById("item-input");
+
 function insertItem(e) {
   e.preventDefault(); // prevent submission
 
-  const itemList = document.querySelector("ul");
-  const item = document.getElementById("item-input");
 
   // creating list item
   const li = document.createElement("li");
@@ -33,6 +35,14 @@ function createIcon() {
   return icon;
 }
 
+
+function removeItem(e) {
+  if (e.target.tagName === "I") {
+    e.target.parentElement.parentElement.remove()
+  }
+}
+
+
 // adding eventlisteners
-const addButton = document.querySelector(".btn");
 addButton.addEventListener("click", insertItem);
+itemList.addEventListener("click",removeItem)
