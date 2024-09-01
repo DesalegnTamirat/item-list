@@ -1,13 +1,18 @@
 const addButton = document.querySelector(".btn");
 const itemList = document.querySelector("ul");
 const item = document.getElementById("item-input");
+const clearButton = document.getElementById("clear");
 
 function insertItem(e) {
   e.preventDefault(); // prevent submission
+  if(item.value === "") return // simple validation
 
 
   // creating list item
   const li = document.createElement("li");
+
+
+
   li.appendChild(document.createTextNode(item.value));
   item.value = ""; // empty the input field
 
@@ -42,7 +47,13 @@ function removeItem(e) {
   }
 }
 
+function removeAll(e) {
+  while(itemList.firstChild)
+    itemList.firstChild.remove()
+}
+
 
 // adding eventlisteners
 addButton.addEventListener("click", insertItem);
-itemList.addEventListener("click",removeItem)
+itemList.addEventListener("click",removeItem);
+clearButton.addEventListener("click", removeAll);
