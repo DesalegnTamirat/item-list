@@ -1,59 +1,59 @@
-const addButton = document.querySelector(".btn");
-const itemList = document.querySelector("ul");
-const item = document.getElementById("item-input");
-const clearButton = document.getElementById("clear");
+// Selecting DOM elements used throughout the script
+const addButton = document.querySelector(".btn");          // Button to add new items
+const itemList = document.querySelector("ul");             // List where items will be displayed
+const item = document.getElementById("item-input");        // Input field for entering new items
+const clearButton = document.getElementById("clear");      // Button to clear all items
 
+// Function to handle adding a new item to the list
 function insertItem(e) {
-  e.preventDefault(); // prevent submission
-  if(item.value === "") return // simple validation
+  e.preventDefault(); // Prevent form submission (default behavior)
+  
+  if (item.value === "") return; // Simple validation: do nothing if input is empty
 
+  const li = document.createElement("li"); // Create a new list item
 
-  // creating list item
-  const li = document.createElement("li");
+  li.appendChild(document.createTextNode(item.value)); // Add input text to the list item
+  item.value = ""; // Clear the input field after adding the item
 
-
-
-  li.appendChild(document.createTextNode(item.value));
-  item.value = ""; // empty the input field
-
-  //append the remove button and finally to ul
-  li.appendChild(createButton());
-  itemList.appendChild(li);
+  const button = createButton("remove-item btn-link text-red"); // Create a remove button
+  button.appendChild(createIcon("fa-solid fa-xmark")); // Add an icon to the button
+  
+  li.appendChild(button); // Append the remove button to the list item
+  itemList.appendChild(li); // Add the list item to the item list (ul)
 }
 
-function createButton() {
-  // create button and setting the class
-  const button = document.createElement("button");
-  button.className = "remove-item btn-link text-red";
+// Function to create a button element with specified classes
+function createButton(classes, id = "") {
+  const button = document.createElement("button"); // Create a button element
+  button.className = classes; // Set the class names
+  if (id !== "") button.id = id; // Optionally set an ID if provided
 
-  // appending the x icon
-  button.appendChild(createIcon());
-
-  return button;
+  return button; // Return the created button element
 }
 
-function createIcon() {
-  // create icon and setting the class
-  const icon = document.createElement("i");
-  icon.className = "fa-solid fa-xmark";
+// Function to create an icon element with specified classes
+function createIcon(classes) {
+  const icon = document.createElement("i"); // Create an icon element
+  icon.className = classes; // Set the class names
 
-  return icon;
+  return icon; // Return the created icon element
 }
 
-
+// Function to handle removing an item from the list
 function removeItem(e) {
-  if (e.target.tagName === "I") {
-    e.target.parentElement.parentElement.remove()
+  if (e.target.tagName === "I") { // Check if the clicked element is an icon
+    e.target.parentElement.parentElement.remove(); // Remove the entire list item
   }
 }
 
+// Function to handle clearing all items from the list
 function removeAll(e) {
-  while(itemList.firstChild)
-    itemList.firstChild.remove()
+  while (itemList.firstChild) { // Loop through all child elements of the list
+    itemList.firstChild.remove(); // Remove each child element
+  }
 }
 
-
-// adding eventlisteners
-addButton.addEventListener("click", insertItem);
-itemList.addEventListener("click",removeItem);
-clearButton.addEventListener("click", removeAll);
+// Event listeners to trigger the appropriate functions
+addButton.addEventListener("click", insertItem); // Add item on button click
+itemList.addEventListener("click", removeItem); // Remove item on clicking the remove button
+clearButton.addEventListener("click", removeAll); // Clear all items on clicking the clear button
