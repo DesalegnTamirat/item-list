@@ -2,6 +2,7 @@
 const addButton = document.querySelector(".btn");          // Button to add new items
 const itemList = document.querySelector("ul");             // List where items will be displayed
 const item = document.getElementById("item-input");        // Input field for entering new items
+const filter = document.getElementById("filter");
 const clearButton = document.getElementById("clear");      // Button to clear all items
 
 // Function to handle adding a new item to the list
@@ -20,6 +21,8 @@ function insertItem(e) {
   
   li.appendChild(button); // Append the remove button to the list item
   itemList.appendChild(li); // Add the list item to the item list (ul)
+
+  checkUI();
 }
 
 // Function to create a button element with specified classes
@@ -42,14 +45,31 @@ function createIcon(classes) {
 // Function to handle removing an item from the list
 function removeItem(e) {
   if (e.target.tagName === "I") { // Check if the clicked element is an icon
-    e.target.parentElement.parentElement.remove(); // Remove the entire list item
+    if (confirm("Are you sure")) e.target.parentElement.parentElement.remove(); // Remove the entire list item
+    checkUI();
   }
 }
 
 // Function to handle clearing all items from the list
 function removeAll(e) {
+  if (!confirm("Do you want to remove all item?")) return;
   while (itemList.firstChild) { // Loop through all child elements of the list
     itemList.firstChild.remove(); // Remove each child element
+  }
+  checkUI();
+}
+
+function checkUI() {
+  const lists = document.querySelectorAll("li");
+
+  // making the filter and the clearbutton disappear if no item and while there is make it visible
+  if (lists.length === 0) {
+    clearButton.style.display = "none";
+    filter.style.display = "none";
+  }
+  else {
+    clearButton.style.display = "block";
+    filter.style.display = "block";
   }
 }
 
