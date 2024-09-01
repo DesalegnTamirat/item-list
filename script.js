@@ -4,6 +4,7 @@ const itemList = document.querySelector("ul");             // List where items w
 const itemInput = document.getElementById("item-input");   // Input field for entering new items
 const filter = document.getElementById("filter");          // Filter input field
 const clearButton = document.getElementById("clear");      // Button to clear all items
+let isOnEdit = false;
 
 // Function to handle adding a new item to the list
 function insertItem(e) {
@@ -12,6 +13,12 @@ function insertItem(e) {
   const itemName = itemInput.value.trim(); // Get the value of the input field and trim whitespace
 
   if (itemName === "") return; // Simple validation: do nothing if input is empty
+
+  if(isOnEdit) {
+    const toBeEdited = document.querySelector(".edit-mode");
+    updateItem(toBeEdited.firstChild.textContent);
+    return;
+  }
 
   addToDom(itemName); // Add the item to the DOM
   addItemToLocalStorage(itemName); // Add the item to localStorage
@@ -31,6 +38,18 @@ function addToDom(itemName) {
   itemList.appendChild(li); // Add the list item to the item list (ul)
 
   checkUI(); // Update UI based on the current list state
+}
+
+function updateItem(itemName) {
+  const shoppingList = JSON.parse(localStorage.getItem("shopping list")) || [];
+  shoppingList.forEach((name, i) => {
+    if (name === itemName) {
+      shoppingList[i] = itemInput.value;
+    }
+  });
+  localStorage.setItem("shopping list", JSON.stringify(shoppingList));
+  checkUI();
+  display();
 }
 
 // Function to create a button element with specified classes
@@ -59,28 +78,36 @@ function removeItem(e) {
     if (confirm("Are you sure?")) {
       itemToRemove.remove(); // Remove the entire list item
       removeItemFromLocalStorage(itemName); // Remove from localStorage
+      checkUI();
     }
-
-    checkUI();
   }
+  else addToEdit(e);
 }
 
 // Function to handle clearing all items from the list
 function removeAll(e) {
   if (!confirm("Do you want to remove all items?")) return;
   
-  while (itemList.firstChild) { // Loop through all child elements of the list
-    itemList.firstChild.remove(); // Remove each child element
-  }
+  itemList.textContent = "";
   
   clearLocalStorage();
   checkUI();
 }
 
+function addToEdit(e) {
+  checkUI();
+  if(!(e.target === e.currentTarget)) {
+    isOnEdit = true;
+    e.target.classList.add("edit-mode");
+    itemInput.value = e.target.firstChild.textContent;
+    addButton.innerHTML = "<i class='fa-solid fa-pen'></i> Update Item";
+    addButton.style.backgroundColor = "rgb(10, 100, 10)"
+  }
+}
+
 // Function to check UI elements based on list state
 function checkUI() {
   const lists = document.querySelectorAll("li");
-  
   // Toggle the filter and clear button visibility based on list presence
   if (lists.length === 0) {
     clearButton.style.display = "none";
@@ -89,6 +116,17 @@ function checkUI() {
     clearButton.style.display = "block";
     filter.style.display = "block";
   }
+  
+  if(isOnEdit) {
+    isOnEdit = false;
+    itemInput.value = "";
+    const toBeEdited = document.querySelector(".edit-mode")
+    if (toBeEdited) toBeEdited.classList.remove("edit-mode");
+    addButton.innerHTML = "<i class='fa-solid fa-plus'></i> Add Item"
+    addButton.style.backgroundColor = "#333";
+    
+  }
+
 }
 
 // Function to filter the list items based on user input
@@ -139,5 +177,6 @@ itemList.addEventListener("click", removeItem); // Remove item on clicking the r
 clearButton.addEventListener("click", removeAll); // Clear all items on clicking the clear button
 filter.addEventListener("input", filterOut); // Filter items based on input
 
+; // Display items from localStorage on page load
 checkUI(); // Initial UI check
-display(); // Display items from localStorage on page load
+display();
