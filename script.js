@@ -1,25 +1,28 @@
 // Selecting DOM elements used throughout the script
 const addButton = document.querySelector(".btn");          // Button to add new items
 const itemList = document.querySelector("ul");             // List where items will be displayed
-const item = document.getElementById("item-input");        // Input field for entering new items
-const filter = document.getElementById("filter");
+const itemInput = document.getElementById("item-input");   // Input field for entering new items
+const filter = document.getElementById("filter");          // Filter input field
 const clearButton = document.getElementById("clear");      // Button to clear all items
 
 // Function to handle adding a new item to the list
 function insertItem(e) {
   e.preventDefault(); // Prevent form submission (default behavior)
   
-  if (item.value === "") return; // Simple validation: do nothing if input is empty
+  const itemName = itemInput.value.trim(); // Get the value of the input field and trim whitespace
 
-  addToDom(item.value);
-  addItemToLocalStorage(item.value);
+  if (itemName === "") return; // Simple validation: do nothing if input is empty
+
+  addToDom(itemName); // Add the item to the DOM
+  addItemToLocalStorage(itemName); // Add the item to localStorage
+
+  itemInput.value = ""; // Clear the input field after adding the item
 }
 
 function addToDom(itemName) {
   const li = document.createElement("li"); // Create a new list item
 
   li.appendChild(document.createTextNode(itemName)); // Add input text to the list item
-  item.value = ""; // Clear the input field after adding the item
 
   const button = createButton("remove-item btn-link text-red"); // Create a remove button
   button.appendChild(createIcon("fa-solid fa-xmark")); // Add an icon to the button
@@ -27,7 +30,7 @@ function addToDom(itemName) {
   li.appendChild(button); // Append the remove button to the list item
   itemList.appendChild(li); // Add the list item to the item list (ul)
 
-  checkUI();
+  checkUI(); // Update UI based on the current list state
 }
 
 // Function to create a button element with specified classes
