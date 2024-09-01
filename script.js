@@ -6,29 +6,30 @@ const filter = document.getElementById("filter");          // Filter input field
 const clearButton = document.getElementById("clear");      // Button to clear all items
 let isOnEdit = false;
 
-// Function to handle adding a new item to the list
+// Function to handle adding or updating an item
 function insertItem(e) {
-  e.preventDefault(); // Prevent form submission (default behavior)
-  
-  const itemName = itemInput.value.trim(); // Get the value of the input field and trim whitespace
+  e.preventDefault();
 
+  const itemName = itemInput.value.trim(); // Get the value of the input field and trim whitespace
   if (itemName === "") return; // Simple validation: do nothing if input is empty
 
-  if(isOnEdit) {
-    const toBeEdited = document.querySelector(".edit-mode");
-    updateItem(toBeEdited.firstChild.textContent);
-    return;
+  if (isOnEdit) {
+    updateItem(itemName);
+  } else {
+    if (checkExistence(itemName)) {
+      alert("The item already added");
+      return;
+    }
+    addToDom(itemName); // Add the item to the DOM
+    addItemToLocalStorage(itemName); // Add the item to localStorage
   }
 
-  addToDom(itemName); // Add the item to the DOM
-  addItemToLocalStorage(itemName); // Add the item to localStorage
-
-  itemInput.value = ""; // Clear the input field after adding the item
+  resetForm();
 }
 
+// Function to add a new item to the DOM
 function addToDom(itemName) {
   const li = document.createElement("li"); // Create a new list item
-
   li.appendChild(document.createTextNode(itemName)); // Add input text to the list item
 
   const button = createButton("remove-item btn-link text-red"); // Create a remove button
@@ -40,16 +41,36 @@ function addToDom(itemName) {
   checkUI(); // Update UI based on the current list state
 }
 
-function updateItem(itemName) {
+// Function to update an existing item
+function updateItem(newItemName) {
+  const currentItem = document.querySelector(".edit-mode").firstChild.textContent;
+
+  if (checkExistence(newItemName) && currentItem !== newItemName) {
+    alert("The name overlaps with another item");
+    return;
+  }
+
   const shoppingList = JSON.parse(localStorage.getItem("shopping list")) || [];
-  shoppingList.forEach((name, i) => {
-    if (name === itemName) {
-      shoppingList[i] = itemInput.value;
-    }
-  });
-  localStorage.setItem("shopping list", JSON.stringify(shoppingList));
-  checkUI();
-  display();
+  const itemIndex = shoppingList.indexOf(currentItem);
+  if (itemIndex !== -1) {
+    shoppingList[itemIndex] = newItemName;
+    localStorage.setItem("shopping list", JSON.stringify(shoppingList));
+  }
+
+  display(); // Refresh the display to show updated item
+}
+
+// Function to reset the form after adding or editing an item
+function resetForm() {
+  itemInput.value = ""; // Clear the input field
+  addButton.innerHTML = "<i class='fa-solid fa-plus'></i> Add Item"; // Reset button text
+  addButton.style.backgroundColor = "#333"; // Reset button color
+  isOnEdit = false;
+
+  const toBeEdited = document.querySelector(".edit-mode");
+  if (toBeEdited) toBeEdited.classList.remove("edit-mode"); // Remove edit mode from the item
+
+  checkUI(); // Update UI
 }
 
 // Function to create a button element with specified classes
@@ -80,53 +101,47 @@ function removeItem(e) {
       removeItemFromLocalStorage(itemName); // Remove from localStorage
       checkUI();
     }
+  } else {
+    addToEdit(e); // If not removing, add the item to edit mode
   }
-  else addToEdit(e);
 }
 
 // Function to handle clearing all items from the list
-function removeAll(e) {
+function removeAll() {
   if (!confirm("Do you want to remove all items?")) return;
   
-  itemList.textContent = "";
+  itemList.textContent = ""; // Clear all list items from the DOM
   
-  clearLocalStorage();
-  checkUI();
+  clearLocalStorage(); // Clear all items from localStorage
+  checkUI(); // Update UI
 }
 
+// Function to add an item to edit mode
 function addToEdit(e) {
   checkUI();
-  if(!(e.target === e.currentTarget)) {
+  if (!(e.target === e.currentTarget)) {
     isOnEdit = true;
     e.target.classList.add("edit-mode");
     itemInput.value = e.target.firstChild.textContent;
     addButton.innerHTML = "<i class='fa-solid fa-pen'></i> Update Item";
-    addButton.style.backgroundColor = "rgb(10, 100, 10)"
+    addButton.style.backgroundColor = "rgb(10, 100, 10)";
   }
+}
+
+// Function to check if an item already exists
+function checkExistence(itemName) {
+  const shoppingList = JSON.parse(localStorage.getItem("shopping list")) || [];
+  return shoppingList.includes(itemName);
 }
 
 // Function to check UI elements based on list state
 function checkUI() {
   const lists = document.querySelectorAll("li");
-  // Toggle the filter and clear button visibility based on list presence
-  if (lists.length === 0) {
-    clearButton.style.display = "none";
-    filter.style.display = "none";
-  } else {
-    clearButton.style.display = "block";
-    filter.style.display = "block";
-  }
   
-  if(isOnEdit) {
-    isOnEdit = false;
-    itemInput.value = "";
-    const toBeEdited = document.querySelector(".edit-mode")
-    if (toBeEdited) toBeEdited.classList.remove("edit-mode");
-    addButton.innerHTML = "<i class='fa-solid fa-plus'></i> Add Item"
-    addButton.style.backgroundColor = "#333";
-    
-  }
+  clearButton.style.display = lists.length === 0 ? "none" : "block";
+  filter.style.display = lists.length === 0 ? "none" : "block";
 
+  if (isOnEdit) resetForm(); // Reset the form if in edit mode
 }
 
 // Function to filter the list items based on user input
@@ -136,12 +151,7 @@ function filterOut() {
 
   lists.forEach(list => {
     const itemName = list.textContent.toLowerCase();
-    
-    if (itemName.includes(target)) {
-      list.style.display = "flex";
-    } else {
-      list.style.display = "none";
-    }
+    list.style.display = itemName.includes(target) ? "flex" : "none";
   });
 }
 
@@ -154,7 +164,7 @@ function addItemToLocalStorage(itemName) {
 
 // Function to display items from localStorage on page load
 function display() {
-  document.querySelector("ul").innerHTML = "";
+  itemList.innerHTML = ""; // Clear the current list
   const shoppingList = JSON.parse(localStorage.getItem("shopping list")) || [];
   shoppingList.forEach(itemName => addToDom(itemName));
 }
@@ -177,6 +187,11 @@ itemList.addEventListener("click", removeItem); // Remove item on clicking the r
 clearButton.addEventListener("click", removeAll); // Clear all items on clicking the clear button
 filter.addEventListener("input", filterOut); // Filter items based on input
 
-; // Display items from localStorage on page load
-checkUI(); // Initial UI check
+// Optional: Handle Enter key to add/update item
+itemInput.addEventListener("keypress", (e) => {
+  if (e.key === "Enter") insertItem(e);
+});
+
+// Display items from localStorage on page load
 display();
+checkUI();
