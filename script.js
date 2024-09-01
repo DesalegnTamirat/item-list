@@ -59,11 +59,10 @@ function removeAll(e) {
   checkUI();
 }
 
-function filterOut() {
 
 function checkUI() {
   const lists = document.querySelectorAll("li");
-
+  
   // making the filter and the clearbutton disappear if no item and while there is make it visible
   if (lists.length === 0) {
     clearButton.style.display = "none";
@@ -75,6 +74,7 @@ function checkUI() {
   }
 }
 
+function filterOut() {
   const target = filter.value.toLowerCase();
   const lists = document.querySelectorAll("li");
   lists.forEach(list => {
