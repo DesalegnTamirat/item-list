@@ -59,6 +59,8 @@ function removeAll(e) {
   checkUI();
 }
 
+function filterOut() {
+
 function checkUI() {
   const lists = document.querySelectorAll("li");
 
@@ -73,7 +75,22 @@ function checkUI() {
   }
 }
 
+  const target = filter.value.toLowerCase();
+  const lists = document.querySelectorAll("li");
+  lists.forEach(list => {
+    itemName = list.textContent.toLowerCase();
+    console.log(itemName);
+    if(itemName.includes(target))
+      list.style.display = "flex"
+    else
+      list.style.display = "none"
+  })
+}
+
 // Event listeners to trigger the appropriate functions
 addButton.addEventListener("click", insertItem); // Add item on button click
 itemList.addEventListener("click", removeItem); // Remove item on clicking the remove button
 clearButton.addEventListener("click", removeAll); // Clear all items on clicking the clear button
+filter.addEventListener("input", filterOut)
+
+checkUI();
